@@ -20,6 +20,7 @@ def create_ball(space, radius, mass):
     shape.mass = mass
     shape.color = (255, 0, 0, 100)
     space.add(body, shape)
+    shape.elasticity = 1
     return shape
 
 def create_ground(space, width, height):
@@ -27,6 +28,7 @@ def create_ground(space, width, height):
     body = pymunk.Body(body_type=pymunk.Body.STATIC)
     body.position = ground[0]
     shape = pymunk.Poly.create_box(body, ground[1])
+    shape.elasticity = 1
     space.add(body, shape)
 
 def run(window, width, height):
@@ -37,8 +39,8 @@ def run(window, width, height):
 
     space = pymunk.Space()
     space.gravity = (0, 981)
-
-    ball = create_ball(space, 30, 20)
+    ballmass = 20
+    ball = create_ball(space, 30, ballmass)
     create_ground(space, width, height)
 
     draw_options = pymunk.pygame_util.DrawOptions(window)
@@ -48,6 +50,29 @@ def run(window, width, height):
             if event.type == pygame.QUIT:
                 run = False
                 break
+        
+        massx = ballmass * 5
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            ball.body.apply_impulse_at_local_point((0, -100), (0, 0))
+        if keys[pygame.K_a]:
+            ball.body.apply_impulse_at_local_point((-100, 0), (0, 0))
+        if keys[pygame.K_s]:
+            ball.body.apply_impulse_at_local_point((0, 100), (0, 0))
+        if keys[pygame.K_d]:
+            ball.body.apply_impulse_at_local_point((100, 0), (0, 0))
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_LSHIFT:
+                ball.mass = massx
+                ball.color = (125, 0, 0, 100)
+                
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_LSHIFT:
+                ball.mass = ballmass
+                ball.color = (255, 0, 0, 100)
+
+            
+        
         draw(space, window, draw_options)
         space.step(dt)
         clock.tick(fps)
@@ -56,3 +81,4 @@ def run(window, width, height):
 
 if __name__ == "__main__":
     run(window, WIDTH, HEIGHT)
+
